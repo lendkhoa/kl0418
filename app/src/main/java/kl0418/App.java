@@ -4,11 +4,22 @@
 package kl0418;
 
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
+    /**
+     * Starts the tool rental checkout process
+     */
+    public static void startCheckout() {
+        printInventoryAndPrices();
+    }
+
+    /**
+     * Loads the store inventories and charging prices
+     */
+    private static void printInventoryAndPrices() {
+        FileLoader fl = new FileLoader();
+        fl.printInventoryAndPrices();
     }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        startCheckout();
     }
 }
