@@ -5,7 +5,7 @@ Tool Code     Tool Type       Brand
 CHNS          Chainsaw        Stihl
 LADW          Ladder          Werner
 JAKD          Jackhammer      DeWalt
-Jackhammer    Jackhammer      Ridgid
+JAKR          Jackhammer      Ridgid
 
 
 

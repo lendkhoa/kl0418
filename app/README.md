@@ -20,5 +20,5 @@ charge.
 ## Build & Run
 ```bash
 ./gradlew build
-./gradlew run
+./gradlew run --console=plain --quiet
 ```
