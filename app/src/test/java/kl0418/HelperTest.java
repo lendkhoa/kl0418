@@ -37,4 +37,6 @@ public class HelperTest {
 
 		System.setIn(systemIn);
 	}
+
+	// Similarly we will continue to add JUnit test for ther helper's functions
 }

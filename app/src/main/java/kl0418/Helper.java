@@ -3,6 +3,9 @@ package kl0418;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -10,7 +13,9 @@ import java.util.InputMismatchException;
 import java.util.Set;
 
 /**
- * File loader to simply print the content from a text file
+ * This is a Helper class that performs various tasks such as loading content
+ * from file
+ * and getting user's input from terminal
  */
 public class Helper {
 	public Helper() {
@@ -20,14 +25,18 @@ public class Helper {
 	/**
 	 * Retrieves user inputs for checkout process
 	 */
-	public void getUserInputs() {
+	public UserInput getUserInputs() {
 		Scanner scanner = new Scanner(System.in);
+
 		String toolCode = getToolCode(scanner);
 		int rentalDayCount = getRentalDayCount(scanner);
-		System.out.println("User selected: " + toolCode);
-		System.out.println("User selected: " + rentalDayCount);
+		int discountPercent = getDiscountPercent(scanner);
+		LocalDate checkoutDate = getCheckoutDate(scanner);
+		UserInput userInput = new UserInput.Builder().toolCode(toolCode).rentalDayCount(rentalDayCount)
+				.discountPercent(discountPercent).checkoutDate(checkoutDate).build();
 
 		scanner.close();
+		return userInput;
 	}
 
 	/**
@@ -68,18 +77,80 @@ public class Helper {
 				try {
 					int rentalDayCount = scanner.nextInt();
 					if (rentalDayCount > 365) {
-						System.out.println(" ⛔️ Invalid tool code. Please enter a valid code.");
+						System.out.println(" ⛔️ Invalid rental day count");
 						scanner.next();
 					} else {
 						return rentalDayCount;
 					}
 				} catch (InputMismatchException e) {
-					System.out.println(" ⛔️ Invalid tool code. Please enter a valid code.");
+					System.out.println(" ⛔️ Invalid rental day count");
 					scanner.next();
 				}
 
 			} else {
 				System.out.println(" ⛔️ No input found. Please enter a valid rental day count.");
+				scanner.next();
+			}
+		}
+	}
+
+	/**
+	 * Retrieves the user input for discount percent (whole number). Rejects if the
+	 * input is
+	 * greater than negative, greater than 100 or not a whole number.
+	 * 
+	 * @param scanner the system in scanner
+	 * @return the valid user selected discount percent
+	 */
+	public int getDiscountPercent(Scanner scanner) {
+		while (true) {
+			System.out.print("Enter discount percent (0-100): ");
+			if (scanner.hasNextLine()) {
+				try {
+					int discountPercent = scanner.nextInt();
+					if (discountPercent < 0 || discountPercent > 100) {
+						System.out.println(" ⛔️ Discount percent must be < 100");
+						scanner.next();
+					} else {
+						return discountPercent;
+					}
+				} catch (InputMismatchException e) {
+					System.out.println(" ⛔️ Invalid discount percent. Please enter a valid discount percent.");
+					scanner.next();
+				}
+
+			} else {
+				System.out.println(" ⛔️ No input found. Please enter a valid discount percent.");
+				scanner.next();
+			}
+		}
+	}
+
+	/**
+	 * Retrieves the user input for checkout date.
+	 * 
+	 * @param scanner the system in scanner
+	 * @return the valid user selected checkout date
+	 */
+	public LocalDate getCheckoutDate(Scanner scanner) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+		System.out.print("Enter checkout date (MM/dd/yyyy): ");
+		while (true) {
+			if (scanner.hasNextLine()) {
+				try {
+					String checkoutDateStr = scanner.nextLine();
+					if (!checkoutDateStr.isBlank()) {
+						LocalDate date = LocalDate.parse(checkoutDateStr, formatter);
+						return date;
+					}
+				} catch (DateTimeParseException e) {
+					System.out.println(" ⛔️ Invalid check-out date. Please enter a valid date.");
+					System.out.print("Enter checkout date (MM/dd/yyyy): ");
+					scanner.next();
+				}
+			} else {
+				System.out.println(" ⛔️ No input found. Please enter a valid discount percent.");
+				System.out.print("Enter checkout date (MM/dd/yyyy): ");
 				scanner.next();
 			}
 		}
