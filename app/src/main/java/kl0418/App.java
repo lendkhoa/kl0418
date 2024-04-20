@@ -12,10 +12,14 @@ public class App {
     public static void startCheckout() {
         printInventoryAndPrices();
         UserInput userInput = helper.getUserInputs();
-        System.out.println("Tool code: " + userInput.toolCode);
-        System.out.println("Rental day count: " + userInput.rentalDayCount);
-        System.out.println("Discount percent: " + userInput.discountPercent);
-        System.out.println("Checkout date: " + userInput.checkoutDate);
+
+        AgreementGenerator generator = new AgreementGenerator(userInput);
+        generator.generateAgreement();
+
+        // System.out.println("Tool code: " + userInput.toolCode);
+        // System.out.println("Rental day count: " + userInput.rentalDayCount);
+        // System.out.println("Discount percent: " + userInput.discountPercent);
+        // System.out.println("Checkout date: " + userInput.checkoutDate);
     }
 
     /**
