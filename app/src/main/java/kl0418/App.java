@@ -28,16 +28,13 @@ public class App {
      * Loads the store inventories and charging prices
      */
     private static void printInventoryAndPrices() {
-        System.out.println("\n CHECKOUT TOOLS \n");
         helper.printInventoryAndPrices();
     }
 
     public static void main(String[] args) {
         boolean isDebug = Arrays.asList(args).contains("debug");
         String debugFlag = isDebug ? "True" : "False";
-        ProcessBuilder processBuilder = new ProcessBuilder("RentalDemo");
-        processBuilder.environment().put("DEBUG_FLAG", debugFlag);
-
+        System.setProperty("DEBUG_FLAG", debugFlag);
         startCheckout();
     }
 }

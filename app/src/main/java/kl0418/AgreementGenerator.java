@@ -42,6 +42,7 @@ public class AgreementGenerator {
 				(Object[]) policies.get(userInput.toolCode));
 		int discountPercent = userInput.discountPercent;
 		double discountAmount = roundUpToNextCent(discountPercent * prediscountCharge / 100.0);
+		double finalCharge = roundUpToNextCent(prediscountCharge - discountAmount);
 
 		String agreement = " \n\n === RENTAL AGREEMENT === \n\n" +
 				"Tool code: " + userInput.toolCode + "\n" +
@@ -54,8 +55,8 @@ public class AgreementGenerator {
 				"Pre-discount charge: $" + prediscountCharge + "\n" +
 				"Discount percent: " + discountPercent + "%\n" +
 				"Discount amount: $" + discountAmount + "\n" +
-				"Final charge: $" + (prediscountCharge - discountAmount) + "\n" +
-				"=========================";
+				"Final charge: $" + finalCharge + "\n" +
+				"\n==========================";
 		System.out.println(agreement);
 	}
 

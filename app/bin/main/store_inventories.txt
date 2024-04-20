@@ -1,4 +1,4 @@
-Available tools
+AVAILABLE TOOLS
 
 Tool Code     Tool Type       Brand
 -----------------------------------
@@ -9,7 +9,8 @@ JAKR          Jackhammer      Ridgid
 
 
 
-Charging Price
+CHARGING PRICES AND POLICIES
+
 Name     Daily Charge      Weekday Charge      Weekend Charge   Holiday Charge
 ----------------------------------------------------------------------------------
 Ladder      $1.99               Yes                  Yes             No

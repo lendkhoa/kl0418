@@ -30,10 +30,11 @@ public class Helper {
 	public UserInput getUserInputs() {
 		Scanner scanner = new Scanner(System.in);
 
+		System.out.println("\n CHECKOUT \n");
 		String toolCode = getToolCode(scanner);
+		LocalDate checkoutDate = getCheckoutDate(scanner);
 		int rentalDayCount = getRentalDayCount(scanner);
 		int discountPercent = getDiscountPercent(scanner);
-		LocalDate checkoutDate = getCheckoutDate(scanner);
 		UserInput userInput = new UserInput.Builder().toolCode(toolCode).rentalDayCount(rentalDayCount)
 				.discountPercent(discountPercent).checkoutDate(checkoutDate).build();
 
@@ -114,24 +115,21 @@ public class Helper {
 		while (true) {
 			if (scanner.hasNextLine()) {
 				try {
-					int discountPercent = scanner.nextInt();
+					int discountPercent = Integer.parseInt(scanner.next().trim());
 					if (discountPercent < 0 || discountPercent > 100) {
 						System.out.println(" ⛔️ Discount percent must be >= 0 and <= 100");
 						System.out.print("Enter discount percent (0-100): ");
-						scanner.next();
 					} else {
 						return discountPercent;
 					}
-				} catch (InputMismatchException e) {
+				} catch (Exception e) {
 					System.out.println(" ⛔️ Invalid discount percent. Please enter a valid discount percent.");
 					System.out.print("Enter discount percent (0-100): ");
-					scanner.next();
 				}
 
 			} else {
 				System.out.println(" ⛔️ No input found. Please enter a valid discount percent.");
 				System.out.print("Enter discount percent (0-100): ");
-				scanner.next();
 			}
 		}
 	}
@@ -188,8 +186,8 @@ public class Helper {
 	 * @param message the debug message to print
 	 */
 	public static void printDebug(String message) {
-		if (DEBUG_FLAG == "True") {
-			System.out.println("DEBUG: " + message);
+		if (DEBUG_FLAG == "True" && !message.isEmpty()) {
+			System.out.print(" 🐛: " + message);
 		}
 	}
 
