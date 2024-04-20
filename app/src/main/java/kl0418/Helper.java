@@ -18,8 +18,10 @@ import java.util.Set;
  * and getting user's input from terminal
  */
 public class Helper {
-	public Helper() {
+	private static String DEBUG_FLAG;
 
+	public Helper() {
+		DEBUG_FLAG = System.getProperty("DEBUG_FLAG");
 	}
 
 	/**
@@ -46,11 +48,12 @@ public class Helper {
 	 * @return the valid user selected toolCode
 	 */
 	public String getToolCode(Scanner scanner) {
+		String toolCode = "";
 		Set<String> validSet = new HashSet<>(Arrays.asList("CHNS", "LADW", "JAKD", "JAKR"));
 		while (true) {
 			System.out.print("Enter tool code: ");
-			if (scanner.hasNextLine()) {
-				String toolCode = scanner.nextLine().toUpperCase();
+			if (!toolCode.isEmpty() || scanner.hasNextLine()) {
+				toolCode = scanner.nextLine().toUpperCase();
 				if (validSet.contains(toolCode)) {
 					return toolCode;
 				} else {
@@ -64,31 +67,35 @@ public class Helper {
 	}
 
 	/**
-	 * Retrieves the user input for rental day count. Rejects if the input is
-	 * greater than 365 days.
+	 * Retrieves the user input for rental day count. Must be 1 or greater
+	 * and smaller than a default MAX_DAYS
 	 * 
 	 * @param scanner the system in scanner
 	 * @return the valid user selected rental day count
 	 */
 	public int getRentalDayCount(Scanner scanner) {
+		int MAX_DAYS = 1095; // 3 years
+		System.out.print("Enter rental day count: ");
 		while (true) {
-			System.out.print("Enter rental day count: ");
 			if (scanner.hasNextLine()) {
 				try {
 					int rentalDayCount = scanner.nextInt();
-					if (rentalDayCount > 365) {
-						System.out.println(" ⛔️ Invalid rental day count");
+					if (rentalDayCount < 0 || rentalDayCount > MAX_DAYS) {
+						System.out.println(" ⛔️ Rental day count must be 1 or greater and less than " + MAX_DAYS);
+						System.out.print("Enter rental day count: ");
 						scanner.next();
 					} else {
 						return rentalDayCount;
 					}
 				} catch (InputMismatchException e) {
-					System.out.println(" ⛔️ Invalid rental day count");
+					System.out.println(" ⛔️ Rental day count must be 1 or greater and less than " + MAX_DAYS);
+					System.out.print("Enter rental day count: ");
 					scanner.next();
 				}
 
 			} else {
 				System.out.println(" ⛔️ No input found. Please enter a valid rental day count.");
+				System.out.print("Enter rental day count: ");
 				scanner.next();
 			}
 		}
@@ -103,24 +110,27 @@ public class Helper {
 	 * @return the valid user selected discount percent
 	 */
 	public int getDiscountPercent(Scanner scanner) {
+		System.out.print("Enter discount percent (0-100): ");
 		while (true) {
-			System.out.print("Enter discount percent (0-100): ");
 			if (scanner.hasNextLine()) {
 				try {
 					int discountPercent = scanner.nextInt();
 					if (discountPercent < 0 || discountPercent > 100) {
-						System.out.println(" ⛔️ Discount percent must be < 100");
+						System.out.println(" ⛔️ Discount percent must be >= 0 and <= 100");
+						System.out.print("Enter discount percent (0-100): ");
 						scanner.next();
 					} else {
 						return discountPercent;
 					}
 				} catch (InputMismatchException e) {
 					System.out.println(" ⛔️ Invalid discount percent. Please enter a valid discount percent.");
+					System.out.print("Enter discount percent (0-100): ");
 					scanner.next();
 				}
 
 			} else {
 				System.out.println(" ⛔️ No input found. Please enter a valid discount percent.");
+				System.out.print("Enter discount percent (0-100): ");
 				scanner.next();
 			}
 		}
@@ -133,25 +143,26 @@ public class Helper {
 	 * @return the valid user selected checkout date
 	 */
 	public LocalDate getCheckoutDate(Scanner scanner) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-		System.out.print("Enter checkout date (MM/dd/yyyy): ");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yy");
+		System.out.print("Enter checkout date (M/d/yy) example 1/1/11: ");
+		String checkoutDateStr = "";
 		while (true) {
-			if (scanner.hasNextLine()) {
+			if (!checkoutDateStr.isEmpty() || scanner.hasNextLine()) {
 				try {
-					String checkoutDateStr = scanner.nextLine();
+					checkoutDateStr = scanner.nextLine();
 					if (!checkoutDateStr.isBlank()) {
 						LocalDate date = LocalDate.parse(checkoutDateStr, formatter);
 						return date;
 					}
 				} catch (DateTimeParseException e) {
-					System.out.println(" ⛔️ Invalid check-out date. Please enter a valid date.");
-					System.out.print("Enter checkout date (MM/dd/yyyy): ");
-					scanner.next();
+					System.out.println(" ⛔️ Invalid check-out date. Please enter a valid date. " + e.toString());
+					System.out.print("Enter checkout date (M/d/yy): ");
+					checkoutDateStr = "";
 				}
 			} else {
-				System.out.println(" ⛔️ No input found. Please enter a valid discount percent.");
-				System.out.print("Enter checkout date (MM/dd/yyyy): ");
-				scanner.next();
+				System.out.println(" ⛔️ No input found. Please enter a valid date.");
+				System.out.print("Enter checkout date (M/d/yy): ");
+				checkoutDateStr = "";
 			}
 		}
 	}
@@ -168,6 +179,17 @@ public class Helper {
 			}
 		} catch (IOException e) {
 			System.err.println("Error reading the file: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Prints a debug message to the console if the DEBUG_FLAG is set to true.
+	 *
+	 * @param message the debug message to print
+	 */
+	public static void printDebug(String message) {
+		if (DEBUG_FLAG == "True") {
+			System.out.println("DEBUG: " + message);
 		}
 	}
 

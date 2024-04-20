@@ -9,8 +9,10 @@ public class AgreementGenerator {
 	private UserInput userInput;
 	private HashMap<String, String[]> info;
 	private HashMap<String, Object> policies;
+	private static Helper helper;
 
 	public AgreementGenerator(UserInput userInput) {
+		helper = new Helper();
 		this.userInput = userInput;
 		// NOTE: We will load these content from database in production
 		this.info = new HashMap<>();
@@ -38,6 +40,8 @@ public class AgreementGenerator {
 		int numbersOfChargingDays = calculateChargeableDays();
 		double prediscountCharge = calculatePrediscountCharge(numbersOfChargingDays,
 				(Object[]) policies.get(userInput.toolCode));
+		int discountPercent = userInput.discountPercent;
+		double discountAmount = roundUpToNextCent(discountPercent * prediscountCharge / 100.0);
 
 		String agreement = " \n\n === RENTAL AGREEMENT === \n\n" +
 				"Tool code: " + userInput.toolCode + "\n" +
@@ -48,6 +52,9 @@ public class AgreementGenerator {
 				"Due date: " + calculateDueDate().format(DateTimeFormatter.ofPattern("MM/dd/yy")) + "\n" +
 				"Charge days: " + numbersOfChargingDays + "\n" +
 				"Pre-discount charge: $" + prediscountCharge + "\n" +
+				"Discount percent: " + discountPercent + "%\n" +
+				"Discount amount: $" + discountAmount + "\n" +
+				"Final charge: $" + (prediscountCharge - discountAmount) + "\n" +
 				"=========================";
 		System.out.println(agreement);
 	}
@@ -94,37 +101,44 @@ public class AgreementGenerator {
 		return chargeableDays;
 	}
 
+	/**
+	 * Calculates the number of non-chargeable days depends on each 
+	 * individual tool charging policy.
+	 * @param date the local date to check against the charging policy
+	 * @param toolPolicy the array object contains the charging policy
+	 * @return the number of non-chargeable days
+	 */
 	private int nonChargeableDays(LocalDate date, Object[] toolPolicy) {
 		int nonChargeableDay = 0;
 		boolean chargeOnWeekend = (boolean) toolPolicy[1];
 		boolean chargeOnHoliday = (boolean) toolPolicy[2];
-		System.out.println("Checking " + date.toString());
+		Helper.printDebug(" \n" + date.toString());
 		if (isWeekend(date) && !chargeOnWeekend) {
-			System.out.println("|__is weekend and not charge on weekend");
+			Helper.printDebug(" |__is weekend and not charge on weekend");
 			// no weekend charge
 			nonChargeableDay += 1;
 		} else if (isHoliday(date) && !chargeOnHoliday) {
-			System.out.println("|__is holiday and not charge on holidays");
+			Helper.printDebug(" |__is holiday and not charge on holidays");
 			// no holiday charge
 			nonChargeableDay += 1;
 		} else if (isWeekend(date) && isIndependenceDay(date)) {
-			System.out.println("|__is weekend and independence day");
+			Helper.printDebug(" |__is weekend and independence day");
 			// independence day on Sat -> observe Friday
 			// tool A doesn't charge on Holiday +1 but charge on weekend -1
 			if (!chargeOnHoliday) {
-				System.out.println("|____ not charge on holiday");
+				Helper.printDebug(" |____ not charge on holiday");
 				nonChargeableDay += 1;
 			}
 			if (!chargeOnWeekend) {
-				System.out.println("|____ not charge on weekend");
+				Helper.printDebug(" |____ not charge on weekend");
 				nonChargeableDay += 1;
 			}
 			if (chargeOnHoliday) {
-				System.out.println("|____ charge on holiday");
+				Helper.printDebug(" |____ charge on holiday");
 				nonChargeableDay -= 1;
 			}
 			if (chargeOnWeekend) {
-				System.out.println("|____ charge on weekend");
+				Helper.printDebug(" |____ charge on weekend");
 				nonChargeableDay -= 1;
 			}
 		}

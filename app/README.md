@@ -21,4 +21,6 @@ charge.
 ```bash
 ./gradlew build
 ./gradlew run --console=plain --quiet
+# OR run in debug mode
+./gradlew run --args="debug" --console=plain --quiet
 ```
