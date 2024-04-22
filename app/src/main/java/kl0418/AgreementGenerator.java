@@ -5,14 +5,15 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
+/**
+ * Generate a rental agreement
+ */
 public class AgreementGenerator {
 	private UserInput userInput;
 	private HashMap<String, String[]> info;
 	private HashMap<String, Object> policies;
-	private static Helper helper;
 
 	public AgreementGenerator(UserInput userInput) {
-		helper = new Helper();
 		this.userInput = userInput;
 		// NOTE: We will load these content from database in production
 		this.info = new HashMap<>();

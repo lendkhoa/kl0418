@@ -33,8 +33,20 @@ public class Helper {
 		System.out.println("\n CHECKOUT \n");
 		String toolCode = getToolCode(scanner);
 		LocalDate checkoutDate = getCheckoutDate(scanner);
+		if (checkoutDate == null) {
+			System.exit(0);
+		}
+
 		int rentalDayCount = getRentalDayCount(scanner);
+		if (rentalDayCount == -1) {
+			System.exit(0);
+		}
+
 		int discountPercent = getDiscountPercent(scanner);
+		if (discountPercent == -1) {
+			System.exit(0);
+		}
+
 		UserInput userInput = new UserInput.Builder().toolCode(toolCode).rentalDayCount(rentalDayCount)
 				.discountPercent(discountPercent).checkoutDate(checkoutDate).build();
 
@@ -77,29 +89,17 @@ public class Helper {
 	public int getRentalDayCount(Scanner scanner) {
 		int MAX_DAYS = 1095; // 3 years
 		System.out.print("Enter rental day count: ");
-		while (true) {
-			if (scanner.hasNextLine()) {
-				try {
-					int rentalDayCount = scanner.nextInt();
-					if (rentalDayCount < 0 || rentalDayCount > MAX_DAYS) {
-						System.out.println(" ⛔️ Rental day count must be 1 or greater and less than " + MAX_DAYS);
-						System.out.print("Enter rental day count: ");
-						scanner.next();
-					} else {
-						return rentalDayCount;
-					}
-				} catch (InputMismatchException e) {
-					System.out.println(" ⛔️ Rental day count must be 1 or greater and less than " + MAX_DAYS);
-					System.out.print("Enter rental day count: ");
-					scanner.next();
-				}
-
+		try {
+			int rentalDayCount = scanner.nextInt();
+			if (rentalDayCount < 0 || rentalDayCount > MAX_DAYS) {
+				System.out.println(" ⛔️ Rental day count must be 1 or greater and less than " + MAX_DAYS);
 			} else {
-				System.out.println(" ⛔️ No input found. Please enter a valid rental day count.");
-				System.out.print("Enter rental day count: ");
-				scanner.next();
+				return rentalDayCount;
 			}
+		} catch (InputMismatchException e) {
+			System.out.println(" ⛔️ Rental day count must be 1 or greater and less than " + MAX_DAYS);
 		}
+		return -1;
 	}
 
 	/**
@@ -108,30 +108,22 @@ public class Helper {
 	 * greater than negative, greater than 100 or not a whole number.
 	 * 
 	 * @param scanner the system in scanner
-	 * @return the valid user selected discount percent
+	 * @return the valid user selected discount percent. -1 if there is an exception
 	 */
 	public int getDiscountPercent(Scanner scanner) {
 		System.out.print("Enter discount percent (0-100): ");
-		while (true) {
-			if (scanner.hasNextLine()) {
-				try {
-					int discountPercent = Integer.parseInt(scanner.next().trim());
-					if (discountPercent < 0 || discountPercent > 100) {
-						System.out.println(" ⛔️ Discount percent must be >= 0 and <= 100");
-						System.out.print("Enter discount percent (0-100): ");
-					} else {
-						return discountPercent;
-					}
-				} catch (Exception e) {
-					System.out.println(" ⛔️ Invalid discount percent. Please enter a valid discount percent.");
-					System.out.print("Enter discount percent (0-100): ");
-				}
-
-			} else {
-				System.out.println(" ⛔️ No input found. Please enter a valid discount percent.");
+		try {
+			int discountPercent = Integer.parseInt(scanner.next().trim());
+			if (discountPercent < 0 || discountPercent > 100) {
+				System.out.println(" ⛔️ Discount percent must be >= 0 and <= 100");
 				System.out.print("Enter discount percent (0-100): ");
+			} else {
+				return discountPercent;
 			}
+		} catch (Exception e) {
+			System.out.println(" ⛔️ Invalid discount percent. Please enter a valid discount percent.");
 		}
+		return -1;
 	}
 
 	/**
@@ -143,26 +135,16 @@ public class Helper {
 	public LocalDate getCheckoutDate(Scanner scanner) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yy");
 		System.out.print("Enter checkout date (M/d/yy) example 1/1/11: ");
-		String checkoutDateStr = "";
-		while (true) {
-			if (!checkoutDateStr.isEmpty() || scanner.hasNextLine()) {
-				try {
-					checkoutDateStr = scanner.nextLine();
-					if (!checkoutDateStr.isBlank()) {
-						LocalDate date = LocalDate.parse(checkoutDateStr, formatter);
-						return date;
-					}
-				} catch (DateTimeParseException e) {
-					System.out.println(" ⛔️ Invalid check-out date. Please enter a valid date. " + e.toString());
-					System.out.print("Enter checkout date (M/d/yy): ");
-					checkoutDateStr = "";
-				}
-			} else {
-				System.out.println(" ⛔️ No input found. Please enter a valid date.");
-				System.out.print("Enter checkout date (M/d/yy): ");
-				checkoutDateStr = "";
+		try {
+			String checkoutDateStr = scanner.nextLine();
+			if (!checkoutDateStr.isBlank()) {
+				LocalDate date = LocalDate.parse(checkoutDateStr, formatter);
+				return date;
 			}
+		} catch (DateTimeParseException e) {
+			System.out.println(" ⛔️ Invalid check-out date. Please enter a valid date. " + e.toString());
 		}
+		return null;
 	}
 
 	/*
