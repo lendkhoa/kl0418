@@ -36,8 +36,10 @@ public class AgreementGenerator {
 
 	/**
 	 * Generates a rental agreement for the user selected tool
+	 * 
+	 * @return agreement the string agreement
 	 */
-	public void generateAgreement() {
+	public String generateAgreement() {
 		int numbersOfChargingDays = calculateChargeableDays();
 		double prediscountCharge = calculatePrediscountCharge(numbersOfChargingDays,
 				(Object[]) policies.get(userInput.toolCode));
@@ -58,7 +60,7 @@ public class AgreementGenerator {
 				"Discount amount: $" + discountAmount + "\n" +
 				"Final charge: $" + finalCharge + "\n" +
 				"\n==========================";
-		System.out.println(agreement);
+		return agreement;
 	}
 
 	private double calculatePrediscountCharge(int days, Object[] policy) {
@@ -89,63 +91,174 @@ public class AgreementGenerator {
 		LocalDate dueDate = startDate.plusDays(userInput.rentalDayCount);
 
 		Object[] policy = (Object[]) policies.get(userInput.toolCode);
+		boolean chargeOnWeekend = (boolean) policy[1];
+		boolean chargeOnHoliday = (boolean) policy[2];
 
 		// Start counting chargeable day from day after checkout date
-		startDate = startDate.plusDays(1);
+		LocalDate today = startDate.plusDays(1);
 		// Calculate total rental days
-		while (!startDate.isAfter(dueDate)) {
-			chargeableDays += 1;
-			// Subtract for non chargeable days
-			chargeableDays -= nonChargeableDays(startDate, policy);
-			startDate = startDate.plusDays(1);
+		while (!today.isAfter(dueDate)) {
+			Helper.printDebug("🐛 Checking " + today);
+			// Today is a regular weekday
+			if (!isWeekend(today) && !isHoliday(today)) {
+				Helper.printDebug("Charge today " + today + " because it's a regular weekday.");
+				chargeableDays += 1;
+				today = today.plusDays(1);
+				Helper.printDebug("Chargeable days " + chargeableDays);
+				continue;
+			}
+			// Today is either weekend or holiday (Independence day or Labor day)
+
+			// Case 1: Policy - Charge on weekend, charge on holiday
+			// No effect to the nonChargeableDay because we calculate the
+			// rental fee on the weekend day and holiday.
+			// Notice that we don't want to charge the user twice on the holiday's observed
+			// day.
+			// Because the logic prioritize user's experience and loyalty over only day
+			// extra income
+			if (chargeOnWeekend && chargeOnHoliday) {
+				Helper.printDebug("This tool charges on both weekend and holiday");
+				chargeableDays += 1;
+				today = today.plusDays(1);
+				Helper.printDebug("Charge today " + today
+						+ " because the tool charges on both weekend and holiday. Chargeable days " + chargeableDays);
+			} else if (chargeOnWeekend && !chargeOnHoliday) {
+				Helper.printDebug("This tool charges weekend but not on holidays");
+				// Case 2: Policy - Charge on weekend, no charge on holiday
+				// No charge on the holiday's observed day (Either Friday or Monday)
+				// Notice that the observed day must be in the range [checkoutDate + 1,
+				// DueDate].
+				// If the observed day is outside this range then we don't apply the no charge
+				if (isWeekend(today) && !isHoliday(today)) {
+					chargeableDays += 1;
+					today = today.plusDays(1);
+					Helper.printDebug(
+							"Charge today " + today + " because the tool charges on weekend. Chargeable days " + chargeableDays);
+				} else if (isWeekend(today) && isIndependenceDay(today)) {
+					DayOfWeek dayOfWeek = today.getDayOfWeek();
+					if (dayOfWeek == DayOfWeek.SATURDAY) {
+						// The independence day is on Saturday
+						LocalDate observedFriday = today.minusDays(1);
+						if (observedFriday.isAfter(startDate)
+								&& (observedFriday.isBefore(dueDate) || observedFriday.isEqual(dueDate))) {
+							chargeableDays -= 1;
+							today = today.plusDays(1);
+							Helper.printDebug("No charge on Independence day observed Friday " + observedFriday
+									+ " because the tool doesn't charge on holiday, independence day on weekend. Chargeable days "
+									+ chargeableDays);
+						}
+					} else {
+						// The independence day is on Sunday
+						LocalDate observedMonday = today.plusDays(1);
+						if (observedMonday.isAfter(startDate)
+								&& (observedMonday.isBefore(dueDate) || observedMonday.isEqual(dueDate))) {
+							chargeableDays -= 1;
+							// We don't want to calculate the observed monday in the range
+							today = today.plusDays(2);
+							Helper.printDebug("No charge on Independence day observed Monday " + observedMonday
+									+ " because the tool doesn't charge on holiday, independence day on weekend. Chargeable days "
+									+ chargeableDays);
+						}
+					}
+				} else {
+					// Today is Labor day
+					Helper.printDebug("No charge on Labor day (Monday) " + today);
+					// We don't want to calculate the observed monday in the range
+					today = today.plusDays(1);
+				}
+
+			} else if (!chargeOnWeekend && chargeOnHoliday) {
+				Helper.printDebug("This tool doesn't charge on weekend but charge on holidays");
+				// Case 3: Policy - No charge on weekend, charge on holiday
+				// We don't charge the fee on the weekend, but we charge the fee once on
+				// the holiday observed day the observed day must be in the range [checkoutDate
+				// + 1, DueDate].
+				if (isWeekend(today) && !isHoliday(today)) {
+					Helper.printDebug(
+							"No charge " + today + " because the tool doesn't charge on weekend");
+					today = today.plusDays(1);
+					Helper.printDebug("Chargeable days: " + chargeableDays);
+				} else if (isWeekend(today) && isIndependenceDay(today)) {
+					// If the holiday is on weekend, we, again, favor the lower fee for customer
+					// and don't charge the today (as a holiday) but also don't take double charge
+					// the observed day
+					DayOfWeek dayOfWeek = today.getDayOfWeek();
+					if (dayOfWeek == DayOfWeek.SATURDAY) {
+						LocalDate observedFriday = today.minusDays(1);
+						if (observedFriday.isAfter(startDate)
+								&& (observedFriday.isBefore(dueDate) || observedFriday.isEqual(dueDate))) {
+							Helper.printDebug("No charge " + today
+									+ " because the tool doesn't charge on weekend. \n The observed Friday is in the rental range, it was already charged.");
+							today = today.plusDays(1);
+							Helper.printDebug("Chargeable days: " + chargeableDays);
+						}
+					} else {
+						// The independence day is on Sunday. We don't charge on Sunday but charge
+						// the observed Monday once.
+						LocalDate observedMonday = today.plusDays(1);
+						if (observedMonday.isAfter(startDate)
+								&& (observedMonday.isBefore(dueDate) || observedMonday.isEqual(dueDate))) {
+							Helper.printDebug("Charge today " + today + " independence day on Sunday");
+							chargeableDays += 1;
+							// We don't want to double-charged the observed monday in the range. Start
+							// checking Tuesday
+							today = today.plusDays(2);
+							Helper.printDebug("No charge on Independence day observed Monday " + observedMonday
+									+ " because the tool doesn't charge on holiday, independence day on weekend. Chargeable days: "
+									+ chargeableDays);
+						}
+					}
+				} else {
+					// Today is Labor day. The tool charges on Labor day
+					Helper.printDebug("Charge today " + today
+							+ " Labor day because the tool charges on holiday.");
+					chargeableDays += 1;
+					today = today.plusDays(1);
+					Helper.printDebug("Chargeable days: " + chargeableDays);
+				}
+			} else if (!chargeOnWeekend && !chargeOnHoliday) {
+				Helper.printDebug("This tool doesn't charge on both weekend and holidays");
+				// Case 4: Policy - No charge on weekend, no charge on holiday
+				// day the observed day must be in the range [checkoutDate + 1, DueDate]
+				if (isWeekend(today) && !isHoliday(today)) {
+					Helper.printDebug("No charge today " + today);
+					today = today.plusDays(1);
+				} else if (isWeekend(today) && isIndependenceDay(today)) {
+					DayOfWeek dayOfWeek = today.getDayOfWeek();
+					if (dayOfWeek == DayOfWeek.SATURDAY) {
+						// The independence day is on Saturday
+						LocalDate observedFriday = today.minusDays(1);
+						if (observedFriday.isAfter(startDate)
+								&& (observedFriday.isBefore(dueDate) || observedFriday.isEqual(dueDate))) {
+							chargeableDays -= 1;
+							today = today.plusDays(1);
+							Helper.printDebug("No charge on Independence day observed Friday " + observedFriday
+									+ " because the tool doesn't charge on holiday, independence day on weekend. Chargeable days: "
+									+ chargeableDays);
+						}
+					} else {
+						// The independence day is on Sunday
+						LocalDate observedMonday = today.plusDays(1);
+						if (observedMonday.isAfter(startDate)
+								&& (observedMonday.isBefore(dueDate) || observedMonday.isEqual(dueDate))) {
+							chargeableDays -= 1;
+							// We don't want to calculate the observed monday in the range
+							today = today.plusDays(2);
+							Helper.printDebug("No charge on Independence day observed Monday " + observedMonday
+									+ " because the tool doesn't charge on holiday, independence day on weekend. Chargeable days: "
+									+ chargeableDays);
+						}
+					}
+				} else {
+					// Today is Labor day. Don't charge today.
+					Helper.printDebug("No charge today " + today + " labor day");
+					today = today.plusDays(1);
+				}
+			}
+
 		}
 
 		return chargeableDays;
-	}
-
-	/**
-	 * Calculates the number of non-chargeable days depends on each 
-	 * individual tool charging policy.
-	 * @param date the local date to check against the charging policy
-	 * @param toolPolicy the array object contains the charging policy
-	 * @return the number of non-chargeable days
-	 */
-	private int nonChargeableDays(LocalDate date, Object[] toolPolicy) {
-		int nonChargeableDay = 0;
-		boolean chargeOnWeekend = (boolean) toolPolicy[1];
-		boolean chargeOnHoliday = (boolean) toolPolicy[2];
-		Helper.printDebug(" \n" + date.toString());
-		if (isWeekend(date) && !chargeOnWeekend) {
-			Helper.printDebug(" |__is weekend and not charge on weekend");
-			// no weekend charge
-			nonChargeableDay += 1;
-		} else if (isHoliday(date) && !chargeOnHoliday) {
-			Helper.printDebug(" |__is holiday and not charge on holidays");
-			// no holiday charge
-			nonChargeableDay += 1;
-		} else if (isWeekend(date) && isIndependenceDay(date)) {
-			Helper.printDebug(" |__is weekend and independence day");
-			// independence day on Sat -> observe Friday
-			// tool A doesn't charge on Holiday +1 but charge on weekend -1
-			if (!chargeOnHoliday) {
-				Helper.printDebug(" |____ not charge on holiday");
-				nonChargeableDay += 1;
-			}
-			if (!chargeOnWeekend) {
-				Helper.printDebug(" |____ not charge on weekend");
-				nonChargeableDay += 1;
-			}
-			if (chargeOnHoliday) {
-				Helper.printDebug(" |____ charge on holiday");
-				nonChargeableDay -= 1;
-			}
-			if (chargeOnWeekend) {
-				Helper.printDebug(" |____ charge on weekend");
-				nonChargeableDay -= 1;
-			}
-		}
-
-		return nonChargeableDay;
 	}
 
 	/**

@@ -167,7 +167,7 @@ public class Helper {
 	public static void printDebug(String message) {
 		String DEBUG_FLAG = System.getProperty("DEBUG_FLAG");
 		if (DEBUG_FLAG == "True" && !message.isEmpty()) {
-			System.out.println(" 🐛: " + message);
+			System.out.println(message);
 		}
 	}
 
