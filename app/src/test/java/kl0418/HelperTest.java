@@ -2,11 +2,12 @@ package kl0418;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Scanner;
+import java.time.LocalDate;
 
 public class HelperTest {
 	private final InputStream systemIn = System.in;
@@ -25,6 +26,41 @@ public class HelperTest {
 		Helper helper = new Helper();
 		String toolCode = helper.getToolCode(scanner);
 		assertEquals("CHNS", toolCode);
+
+		System.setIn(systemIn);
+	}
+
+	/**
+	 * Tests the getCheckoutDate method with valid input
+	 * Assert the expected LocalDate
+	 */
+	@Test
+	public void testCheckoutDateValidInput() {
+		testIn = new ByteArrayInputStream("1/1/20\n".getBytes());
+		System.setIn(testIn);
+
+		Scanner scanner = new Scanner(System.in);
+		Helper helper = new Helper();
+		LocalDate checkoutDate = helper.getCheckoutDate(scanner);
+		LocalDate expected = LocalDate.of(2020, 1, 1);
+		assertEquals(expected, checkoutDate);
+
+		System.setIn(systemIn);
+	}
+
+	/**
+	 * Tests the getCheckoutDate method with valid input
+	 * Assert null is returned
+	 */
+	@Test
+	public void testGetCheckoutDate_InvalidInput() {
+		testIn = new ByteArrayInputStream("-1/1/20\n".getBytes());
+		System.setIn(testIn);
+
+		Scanner scanner = new Scanner(System.in);
+		Helper helper = new Helper();
+		LocalDate checkoutDate = helper.getCheckoutDate(scanner);
+		assertEquals(null, checkoutDate);
 
 		System.setIn(systemIn);
 	}
@@ -68,7 +104,8 @@ public class HelperTest {
 	/**
 	 * Tests the getRentalDayCount method with invalid input.
 	 * 
-	 * This test simulates user input of "2000" (a string representing a long time) instead of a valid
+	 * This test simulates user input of "2000" (a string representing a long time)
+	 * instead of a valid
 	 * integer. The function should return -1
 	 */
 	@Test

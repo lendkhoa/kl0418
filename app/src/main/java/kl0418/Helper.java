@@ -18,10 +18,7 @@ import java.util.Set;
  * and getting user's input from terminal
  */
 public class Helper {
-	private static String DEBUG_FLAG;
-
 	public Helper() {
-		DEBUG_FLAG = System.getProperty("DEBUG_FLAG");
 	}
 
 	/**
@@ -168,8 +165,9 @@ public class Helper {
 	 * @param message the debug message to print
 	 */
 	public static void printDebug(String message) {
+		String DEBUG_FLAG = System.getProperty("DEBUG_FLAG");
 		if (DEBUG_FLAG == "True" && !message.isEmpty()) {
-			System.out.print(" 🐛: " + message);
+			System.out.println(" 🐛: " + message);
 		}
 	}
 

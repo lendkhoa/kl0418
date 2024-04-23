@@ -16,12 +16,8 @@ public class App {
         UserInput userInput = helper.getUserInputs();
 
         AgreementGenerator generator = new AgreementGenerator(userInput);
-        generator.generateAgreement();
-
-        // System.out.println("Tool code: " + userInput.toolCode);
-        // System.out.println("Rental day count: " + userInput.rentalDayCount);
-        // System.out.println("Discount percent: " + userInput.discountPercent);
-        // System.out.println("Checkout date: " + userInput.checkoutDate);
+        String agreement = generator.generateAgreement();
+        System.out.println(agreement);
     }
 
     /**

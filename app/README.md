@@ -21,6 +21,6 @@ charge.
 ```bash
 ./gradlew build
 ./gradlew run --console=plain --quiet
-# OR run in debug mode
+# OR run in debug mode to get helpful log on checking which day is chargeable
 ./gradlew run --args="debug" --console=plain --quiet
 ```
