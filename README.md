@@ -25,10 +25,16 @@ or with --info flag for more detail
 
 
 ## Build & Run
+Build the application
 ```bash
 ./gradlew build
+```
+Run the app
+```bash
 ./gradlew run --console=plain --quiet
-# OR run in debug mode to get helpful log on checking which day is chargeable
+```
+We can remove the debug flag for a more clean output
+```bash
 ./gradlew run --args="debug" --console=plain --quiet
 ```
 
