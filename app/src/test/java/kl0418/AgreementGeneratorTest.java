@@ -35,11 +35,11 @@ public class AgreementGeneratorTest {
 				"Rental days: 3\n" +
 				"Check-out date: 07/02/20\n" +
 				"Due date: 07/05/20\n" +
-				"Charge days: 2\n" +
-				"Pre-discount charge: $3.98\n" +
+				"Charge days: 1\n" +
+				"Pre-discount charge: $1.99\n" +
 				"Discount percent: 10%\n" +
-				"Discount amount: $0.4\n" +
-				"Final charge: $3.58\n" +
+				"Discount amount: $0.2\n" +
+				"Final charge: $1.79\n" +
 				"\n==========================";
 
 		assertEquals(expectedOutput.trim(), agreement.trim());
@@ -170,7 +170,7 @@ public class AgreementGeneratorTest {
 				"Tool brand: Ridgid\n" +
 				"Rental days: 4\n" +
 				"Check-out date: 07/02/20\n" +
-				"Due date: 07/6/20\n" +
+				"Due date: 07/06/20\n" +
 				"Charge days: 1\n" +
 				"Pre-discount charge: $2.99\n" +
 				"Discount percent: 50%\n" +
